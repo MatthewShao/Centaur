@@ -15,7 +15,7 @@ class TestFlowFilter(TestCase):
 
     def test_domain_filter(self):
         # black list test
-        f = FlowFilter(domain_file="domain_example.txt", use_blacklist=False)
+        f = FlowFilter(domain_file="Proxy/domain_example.txt", use_blacklist=False)
         parsed = urlparse("http://www.baidu.com/abc.php")
         assert f.domain_filter(parsed) is True
         parsed = urlparse("http://www.google.com/")
@@ -24,7 +24,7 @@ class TestFlowFilter(TestCase):
         assert f.domain_filter(parsed) is False
 
         # white list test
-        f = FlowFilter(domain_file="domain_example.txt", use_blacklist=True)
+        f = FlowFilter(domain_file="Proxy/domain_example.txt", use_blacklist=True)
         parsed = urlparse("http://www.baidu.com/abc.php")
         assert f.domain_filter(parsed) is False
         parsed = urlparse("http://www.google.com/")
