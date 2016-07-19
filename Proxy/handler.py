@@ -70,7 +70,7 @@ class FlowHandler(object):
 
     def send(self, json_data):
         try:
-            r = requests.post(self.api_url, data=json_data, headers=POST_HEADER)
+            r = requests.put(self.api_url, data=json_data, headers=POST_HEADER)
             if r.status_code == 200:
                 return True
         except ConnectionError, ConnectTimeout:

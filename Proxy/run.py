@@ -58,7 +58,6 @@ def start():
     config = proxy.ProxyConfig(port=8080)
     server = ProxyServer(config)
 
-    print arguments
     flow_filter = FlowFilter(arguments['--filter'], arguments['-p'], arguments['-d'], arguments['--blacklist'])
     flow_handler = FlowHandler(arguments['-u'], arguments['--debug'])
     m = Master(server, flow_filter, flow_handler)
