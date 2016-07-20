@@ -33,10 +33,10 @@ class TestAuth(TestCase):
     def test_auth(self):
         api.testing = True
         with api.test_client() as c:
-            rv = c.post('/login', data=json.dumps(self.fail_test), content_type='application/json')
+            rv = c.post('/api/login', data=json.dumps(self.fail_test), content_type='application/json')
             j = json.loads(rv.data)
             assert j['msg'] == 'Invalid username/password.'
-            rv = c.post('/login', data=json.dumps(self.success_test), content_type='application/json')
+            rv = c.post('/api/login', data=json.dumps(self.success_test), content_type='application/json')
             j = json.loads(rv.data)
             assert 'token' in j
 
@@ -64,15 +64,15 @@ class TestRegister(TestCase):
     def test_register(self):
         api.testing = True
         with api.test_client() as c:
-            rv = c.post('/register', data=json.dumps(self.t1), content_type='application/json')
+            rv = c.post('/api/register', data=json.dumps(self.t1), content_type='application/json')
             j = json.loads(rv.data)
             assert j['msg'] == 'User existed.'
 
-            rv = c.post('/register', data=json.dumps(self.t2), content_type='application/json')
+            rv = c.post('/api/register', data=json.dumps(self.t2), content_type='application/json')
             j = json.loads(rv.data)
             assert j['msg'] == 'Missing field.'
 
-            rv = c.post('/register', data=json.dumps(self.t3), content_type='application/json')
+            rv = c.post('/api/register', data=json.dumps(self.t3), content_type='application/json')
             j = json.loads(rv.data)
             assert j['msg'] == 'Email address invalid.'
 

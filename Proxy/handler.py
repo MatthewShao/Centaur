@@ -1,7 +1,6 @@
 import json
 import requests
 from requests.exceptions import ConnectionError, ConnectTimeout
-import sys
 
 POST_HEADER = {'content-type': 'application/json'}
 API_URL = 'http://127.0.0.1:5000/api/job'

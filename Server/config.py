@@ -1,5 +1,5 @@
 # celery config
-BROKER_URL = "amqp://celery:121131141@208.51.63.113:5672/centaur"
+BROKER_URL = "amqp://guest:guest@rabbitmq.t0.daoapp.io:61539//"
 # CELERY_RESULT_BACKEND = "db+postgresql://centaur:cent4uri$c00l@208.51.63.113/celery"
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
