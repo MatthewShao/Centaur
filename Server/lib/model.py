@@ -33,7 +33,7 @@ class ScriptBase(object):
         self.invoke_rule = re.compile(re_exp, re.I)
 
     def invoke_check(self, s):
-        if self.invoke_rule.search(s):
+        if not self.invoke_rule or self.invoke_rule.search(s):
             return True
         else:
             return False
@@ -41,7 +41,3 @@ class ScriptBase(object):
     def send_task(self):
         tid = celery.send_task('task.' + self.name)
         return tid
-
-
-
-

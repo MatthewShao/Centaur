@@ -28,6 +28,7 @@ job_api = Api(job_bp)
 
 
 class Job(Resource):
+    # refer: https://github.com/celery/celery/blob/master/celery/backends/mongodb.py#L164
 
     def get(self):
         pass
@@ -42,10 +43,10 @@ class Job(Resource):
             flow_filter.add(flow)
 
 
-class JobList(Resource):
+class ListJob(Resource):
 
     def get(self):
         pass
 
 job_api.add_resource(Job, '/job')
-job_api.add_resource(JobList, '/list/job')
+job_api.add_resource(ListJob, '/list/job')
