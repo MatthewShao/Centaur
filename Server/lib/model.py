@@ -24,16 +24,18 @@ class ScriptBase(object):
         self.headers = headers
         self.invoke_rule = None
         self.is_enable = True
+        self._rule_regax = None
 
     def toggle_enable(self):
         self.is_enable = not self.is_enable
         return self.is_enable
 
     def set_invoke_rule(self, re_exp):
-        self.invoke_rule = re.compile(re_exp, re.I)
+        self.invoke_rule = re_exp
+        self._rule_regax = re.compile(self.invoke_rule, re.I)
 
     def invoke_check(self, s):
-        if not self.invoke_rule or self.invoke_rule.search(s):
+        if not self.invoke_rule or self._rule_regax.search(s):
             return True
         else:
             return False

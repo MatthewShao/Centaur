@@ -1,8 +1,16 @@
 from flask import Blueprint, jsonify, request, make_response, current_app, send_from_directory
 from flask.ext.restful import Api, Resource, reqparse
 from lib.model import ScriptBase
+from werkzeug import FileStorage
 import os
 
+
+def init_parse():
+    parser = reqparse.RequestParser()
+    parser.add_argument('file', type=FileStorage, location='files')
+    return parser
+
+parser = init_parse()
 script_bp = Blueprint('script', __name__)
 script_api = Api(script_bp)
 
@@ -38,8 +46,17 @@ class Script(Resource):
     def post(self):
         pass
 
-    def put(self):
-        pass
+    def put(self, name):
+        args = parser.parse_args()
+        file = args['file']
+        try:
+            file.save('scripts/'+ name + '.py')
+            return make_response(jsonify({"msg": name + ".py uploaded."}))
+
+        except Exception:
+            return make_response(jsonify({"msg": "Upload failed."}))
+
+
 
 
 class ListScript(Resource):
@@ -56,6 +73,6 @@ class DownloadScript(Resource):
 
 
 script_set = ScriptSet()
-script_api.add_resource(Script, '/script')
+script_api.add_resource(Script, '/script/<string:name>')
 script_api.add_resource(ListScript, '/list/script')
 script_api.add_resource(DownloadScript, '/download/script/<string:name>')
