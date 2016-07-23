@@ -1,9 +1,22 @@
 from unittest import TestCase
 from Server.script import ScriptSet
+from Server.run import api
+from cStringIO import StringIO
 import os
 
 class TestScript(TestCase):
-    pass
+    def setUp(self):
+        self.api = api
+        self.api.config['TESTING'] = True
+
+    def put(self):
+        with self.api.test_client() as c:
+            r = c.put('/api/script/test', data={
+                file:StringIO("This is test file.",'test.py'),
+            })
+            assert "uploaded" in r.data
+
+
 
 class TestSriptSet(TestCase):
 
