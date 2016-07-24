@@ -44,7 +44,6 @@ class ScriptSet(object):
                 break
         return script
 
-
     def __iter__(self):
         return iter(self._set)
 
@@ -75,7 +74,6 @@ class Script(Resource):
 
     def post(self, name):
         args = parser.parse_args()
-        print args
         script = script_set.get_script(name)
         if script:
             if args['action'] == 'toggle':
@@ -109,7 +107,6 @@ class Script(Resource):
             return make_response(jsonify({"msg": "Upload failed."}))
 
 
-
 class ListScript(Resource):
     def get(self):
         script_set.update()
@@ -117,6 +114,7 @@ class ListScript(Resource):
         for s in script_set:
             result.append((s.name, s.is_enable))
         return result
+
 
 class DownloadScript(Resource):
     def get(self, name):
