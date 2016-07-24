@@ -32,7 +32,10 @@ class ScriptBase(object):
 
     def set_invoke_rule(self, re_exp):
         self.invoke_rule = re_exp
-        self._rule_regax = re.compile(self.invoke_rule, re.I)
+        if re_exp:
+            self._rule_regax = re.compile(self.invoke_rule, re.I)
+        else:
+            self._rule_regax = None
 
     def invoke_check(self, s):
         if not self.invoke_rule or self._rule_regax.search(s):

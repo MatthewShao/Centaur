@@ -8,6 +8,8 @@ import os
 def init_parse():
     parser = reqparse.RequestParser()
     parser.add_argument('file', type=FileStorage, location='files')
+    parser.add_argument('action', type=str)
+    parser.add_argument('invoke_rule', type=str)
     return parser
 
 parser = init_parse()
@@ -34,28 +36,77 @@ class ScriptSet(object):
             names.append(s.name)
         return names
 
+    def get_script(self, name):
+        script = None
+        for s in self._set:
+            if s.name == name:
+                script = s
+                break
+        return script
+
+
     def __iter__(self):
         return iter(self._set)
 
 
 class Script(Resource):
 
-    def get(self):
-        pass
+    def get(self, name):
+        script = script_set.get_script(name)
+        if script:
+            try:
+                f = open("scripts/" + script.name +".py", 'r')
+                script_content = f.read()
+                return jsonify({
+                    "name" : script.name,
+                    "invoke_rule" : script.invoke_rule,
+                    "content": script_content,
+                    "is_enable": script.is_enable
+                })
 
-    def post(self):
-        pass
+            except IOError:
+                response = make_response(jsonify({
+                     "msg": "Fail to read script file."
+                }))
+                response.status_code = 500
+                return response
+        else:
+            return None
+
+    def post(self, name):
+        args = parser.parse_args()
+        print args
+        script = script_set.get_script(name)
+        if script:
+            if args['action'] == 'toggle':
+                return script.toggle_enable()
+            if args['action'] == 'set_rule':
+                try:
+                    script.set_invoke_rule(args['invoke_rule'])
+                    return make_response("Success")
+                except:
+                    return make_response("Failed")
+            else:
+                response = make_response(jsonify({
+                    "msg": "Invalid action."
+                }))
+                response.status_code = 400
+                return response
+
+        else:
+            return None
 
     def put(self, name):
         args = parser.parse_args()
         file = args['file']
         try:
             file.save('scripts/'+ name + '.py')
+            script_set.update()
             return make_response(jsonify({"msg": name + ".py uploaded."}))
 
         except Exception:
+            script_set.update()
             return make_response(jsonify({"msg": "Upload failed."}))
-
 
 
 
