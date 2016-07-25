@@ -43,6 +43,6 @@ class ScriptBase(object):
         else:
             return False
 
-    def send_task(self):
-        tid = celery.send_task('task.' + self.name)
-        return tid
+    def send_task(self, **kwargs):
+        job = celery.send_task('task.' + self.name, **kwargs)
+        return job

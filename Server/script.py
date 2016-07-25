@@ -18,10 +18,15 @@ script_api = Api(script_bp)
 
 
 class ScriptSet(object):
-
+    """
+    The Set for ScriptBase object.
+    """
     def __init__(self):
         self._set = []
         self.update()
+
+    def __iter__(self):
+        return iter(self._set)
 
     def update(self):
         for s in os.listdir('scripts'):
@@ -43,9 +48,6 @@ class ScriptSet(object):
                 script = s
                 break
         return script
-
-    def __iter__(self):
-        return iter(self._set)
 
 
 class Script(Resource):
