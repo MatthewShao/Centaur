@@ -8,7 +8,6 @@ import requests
 from requests import ConnectionError
 
 from pocsuite.lib.core.data import kb, conf
-from pocsuite.lib.core.enums import CUSTOM_LOGGING
 from pocsuite.lib.core.common import filepathParser, multipleReplace, StringImporter, delModule
 from pocsuite.lib.core.settings import POC_IMPORTDICT, HTTP_DEFAULT_HEADER
 
@@ -70,9 +69,10 @@ def _init(self):
 def run(self, flow):
     try:
         poc = kb.registeredPocs[self.moduleName]
-        url = flow.pop[URL]
+        url = flow.pop(URL)
         result = poc.execute(url, mode='verify', params=flow)
-        output = (url, self.pocName, (1, "success") if result.is_success else result.error, time.strftime("%Y-%m-%d %X", time.localtime()), str(result.result))
+        print result
+        output = (url, self.pocName, (1, "success") if result.is_success() else result.error, time.strftime("%Y-%m-%d %X", time.localtime()), str(result.result))
         return output
     except Exception, ex:
         logger.error(ex)
