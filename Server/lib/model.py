@@ -44,5 +44,5 @@ class ScriptBase(object):
             return False
 
     def send_task(self, **kwargs):
-        job = celery.send_task('task.' + self.name, **kwargs)
+        job = celery.send_task('task.' + self.name, kwargs=kwargs)
         return job
