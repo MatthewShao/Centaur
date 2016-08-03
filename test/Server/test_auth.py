@@ -1,7 +1,8 @@
 from unittest import TestCase
 from Server.auth import create_token, parse_token
 from Server.lib.datatype import AttribDict
-from Server.run import api, init_db
+from Server.db import init_db
+from Server.run import api
 import json
 
 

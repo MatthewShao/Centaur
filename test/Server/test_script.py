@@ -25,18 +25,23 @@ class TestScript(TestCase):
         with self.api.test_client() as c:
             c.get('/api/list/script') # update script_set
 
+            r = c.get('/api/script/test')
+            j = json.loads(r.data)
+            origin_state = j['is_enable']
+
             # test toggle
             c.post('/api/script/test', data={
                 'action': 'toggle'
             })
             r = c.get('/api/script/test')
             j = json.loads(r.data)
-            assert not j['is_enable']
+            assert origin_state != j['is_enable']
 
             # test set_rule
             r = c.post('/api/script/test', data={
                 'action': 'set_rule',
-                'invoke_rule': 'test abc'
+                'invoke_rule': 'test abc',
+                'type': 'U'
             })
             assert r.data == 'Success'
             r = c.get('/api/script/test')
