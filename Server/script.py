@@ -10,6 +10,7 @@ def init_parse():
     parser.add_argument('file', type=FileStorage, location='files')
     parser.add_argument('action', type=str)
     parser.add_argument('invoke_rule', type=str)
+    parser.add_argument('type', type=str)
     return parser
 
 parser = init_parse()
@@ -60,9 +61,10 @@ class Script(Resource):
                 script_content = f.read()
                 return jsonify({
                     "name" : script.name,
-                    "invoke_rule" : script.invoke_rule,
+                    "invoke_rule" : script.rule.string,
                     "content": script_content,
-                    "is_enable": script.is_enable
+                    "is_enable": script.rule.is_enable,
+                    "rule_type": script.rule.type
                 })
 
             except IOError:
@@ -82,7 +84,7 @@ class Script(Resource):
                 return script.toggle_enable()
             if args['action'] == 'set_rule':
                 try:
-                    script.set_invoke_rule(args['invoke_rule'])
+                    script.set_invoke_rule(args['invoke_rule'], args['type'])
                     return make_response("Success")
                 except:
                     return make_response("Failed")
@@ -114,7 +116,7 @@ class ListScript(Resource):
         script_set.update()
         result = []
         for s in script_set:
-            result.append((s.name, s.is_enable))
+            result.append((s.name, s.rule.is_enable))
         return result
 
 

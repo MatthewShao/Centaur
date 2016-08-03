@@ -2,7 +2,6 @@ from flask import Flask
 from auth import auth_bp
 from job import job_bp
 from script import script_bp
-from db import init_db
 
 api = Flask(__name__)
 api.config.from_object('Server.config')
@@ -12,7 +11,6 @@ api.register_blueprint(script_bp, url_prefix='/api')
 
 
 def main():
-    init_db()
     api.run(debug=True)
 
 if __name__ == '__main__':
