@@ -1,5 +1,7 @@
 from unittest import TestCase
 from Server.job import JobPool
+from Server.run import api
+import json
 
 
 class TestJobPool(TestCase):
@@ -19,3 +21,29 @@ class TestJobPool(TestCase):
             self.pool.add(i)
         for i in self.pool:
             pass
+
+class TestListJob(TestCase):
+
+    def setUp(self):
+        f = open('scripts/test.py', 'w')
+        f.write("print 'test script'")
+        f.close()
+        self.api = api
+        self.api.config['TESTING'] = True
+
+    def test_list(self):
+        flow = {'U':'http://test.com/test'}
+        with self.api.test_client() as c:
+            c.get('/api/list/script')
+            c.post('api/script/test', data={
+                'action':'set_rule',
+                'invoke_rule': None,
+                'type':'U'
+            })
+            c.put('/api/job', data=flow)
+            r = c.get('/api/list/job')
+
+        j = json.loads(r.data)
+        assert len(j) > 0
+
+

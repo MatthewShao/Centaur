@@ -70,7 +70,10 @@ class Job(Resource):
 class ListJob(Resource):
 
     def get(self):
-        pass
+        result = []
+        for s in pool:
+            result.append((s.id, s.status, s.result))
+        return result
 
 pool = JobPool()
 job_api.add_resource(Job, '/job')
