@@ -68,6 +68,6 @@ class ScriptBase(object):
         else:
             return False
 
-    def send_task(self, **kwargs):
-        job = celery.send_task('task.' + self.name, kwargs=kwargs)
+    def send_task(self, flow):
+        job = celery.send_task('task.' + self.name, [flow,])
         return job
