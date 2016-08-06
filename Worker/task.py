@@ -71,11 +71,12 @@ def run(self, flow):
         poc = kb.registeredPocs[self.moduleName]
         url = flow.pop(URL)
         result = poc.execute(url, mode='verify', params=flow)
-        print result
-        output = (url, self.pocName, (1, "success") if result.is_success() else result.error, time.strftime("%Y-%m-%d %X", time.localtime()), str(result.result))
+        output = (url, self.pocName, (1, "success") if result.is_success() else (0, str(result.error[1])), time.strftime("%Y-%m-%d %X", time.localtime()), str(result.result))
+        print output
         return output
     except Exception, ex:
         logger.error(ex)
+        return None
 
 ScriptTaskSet = {}
 for name in script_set.iterkeys():
