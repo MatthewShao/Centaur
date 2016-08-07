@@ -20,6 +20,7 @@ def init_parse():
     parser.add_argument(REFERER, type=str)
     parser.add_argument(COOKIE, type=str)
     parser.add_argument(OTHER, type=str)
+    parser.add_argument('action', type=str)
     return parser
 
 flow_filter = DuplicatedFlowFilter()
@@ -51,11 +52,55 @@ class JobPool(object):
 class Job(Resource):
     # refer: https://github.com/celery/celery/blob/master/celery/backends/mongodb.py#L164
 
-    def get(self):
-        pass
+    def get(self, id):
+        return id
 
-    def post(self):
-        pass
+    def post(self, id):
+        # forget, revoke,
+        args = parser.parse_args()
+        job = None
+        for j in pool:
+            if j.id == id:
+                job = j
+                break
+
+        if args['action'] not in ('forget', 'revoke'):
+            response = make_response(jsonify({
+                "msg": "Invalid action."
+            }))
+            response.status_code = 400
+            return response
+
+        if job:
+            if args['action'] == 'forget':
+                try:
+                    job.forget()
+                    return make_response("Success")
+                except:
+                    return make_response("Failed")
+
+            elif args['action'] == 'revoke':
+                try:
+                    job.revoke()
+                    return make_response("Success")
+                except:
+                    return make_response("Failed")
+
+            else:
+                response = make_response(jsonify({
+                    "msg": "Invalid action."
+                }))
+                response.status_code = 400
+                return response
+        else:
+            response = make_response(jsonify({
+                "msg": "Invalid job id or it is not in the pool."
+            }))
+            response.status_code = 400
+            return response
+
+
+class AddJob(Resource):
 
     def put(self):
         flow = parser.parse_args()
@@ -76,5 +121,6 @@ class ListJob(Resource):
         return result
 
 pool = JobPool()
-job_api.add_resource(Job, '/job')
+job_api.add_resource(AddJob, '/job')
+job_api.add_resource(Job, '/job/<string:id>')
 job_api.add_resource(ListJob, '/list/job')

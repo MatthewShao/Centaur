@@ -82,7 +82,8 @@ class Script(Resource):
         if script:
             if args['action'] == 'toggle':
                 return script.toggle_enable()
-            if args['action'] == 'set_rule':
+
+            elif args['action'] == 'set_rule':
                 try:
                     script.set_invoke_rule(args['invoke_rule'], args['type'])
                     return make_response("Success")
