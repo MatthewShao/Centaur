@@ -22,7 +22,8 @@ class TestJobPool(TestCase):
         for i in self.pool:
             pass
 
-class TestListJob(TestCase):
+
+class TestJob(TestCase):
 
     def setUp(self):
         f = open('scripts/test.py', 'w')
@@ -42,8 +43,33 @@ class TestListJob(TestCase):
             })
             c.put('/api/job', data=flow)
             r = c.get('/api/list/job')
+        jobs = json.loads(r.data)
+        assert len(jobs) > 0
 
-        j = json.loads(r.data)
-        assert len(j) > 0
+    def test_post(self):
+        with self.api.test_client() as c:
+            r = c.get('/api/list/job')
+            jobs = json.loads(r.data)
+
+            r = c.post('/api/job/' + jobs[0][0], data={
+                'action':'forget'
+            })
+            assert r.data == 'Success'
+
+            r = c.post('/api/job/' + jobs[0][0], data={
+                'action':'revoke'
+            })
+            assert r.data == 'Success'
+
+            r = c.post('/api/job/' + 'fake_id', data={
+                'action':'forget'
+            })
+            assert json.loads(r.data)["msg"] == "Invalid job id or it is not in the pool."
+
+            r = c.post('/api/job/' + jobs[0][0], data={
+                'action': 'test'
+            })
+            assert json.loads(r.data)["msg"] == "Invalid action."
+
 
 
