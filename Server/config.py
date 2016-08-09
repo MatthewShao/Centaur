@@ -9,10 +9,10 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
 
 # db_config
-db_host = "localhost"
-db_user = "test"
-db_pass = "test"
-db_name = "centaur"
+DB_HOST = "localhost"
+DB_USER = "test"
+DB_PASS = "test"
+DB_NAME = "centaur"
 # flask config
 
 SERVER_URL = "http://127.0.0.1:5000"

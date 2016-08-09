@@ -2,6 +2,10 @@ from flask import Blueprint, jsonify, request, make_response, current_app
 from flask.ext.restful import Api, Resource, reqparse
 from lib.filter import DuplicatedFlowFilter
 from Server.script import script_set
+from Server.config import  DB_HOST, DB_NAME, DB_USER, DB_PASS
+from pymongo import MongoClient
+import json
+
 
 METHOD = 'M'
 URL = 'U'
@@ -27,6 +31,8 @@ flow_filter = DuplicatedFlowFilter()
 parser = init_parse()
 job_bp = Blueprint('job', __name__)
 job_api = Api(job_bp)
+client = MongoClient("mongodb://{}:{}@{}/{}".format(DB_USER, DB_PASS, DB_HOST, DB_NAME))
+job_db = client.centaur
 
 
 class JobPool(object):
@@ -53,7 +59,11 @@ class Job(Resource):
     # refer: https://github.com/celery/celery/blob/master/celery/backends/mongodb.py#L164
 
     def get(self, id):
-        return id
+        job = job_db.celery_taskmeta.find_one({'_id': id})
+        if job:
+            job['date_done'] = str(job['date_done'])
+            job['result'] = json.loads(job['result'])
+        return job
 
     def post(self, id):
         # forget, revoke,
