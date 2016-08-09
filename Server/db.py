@@ -1,6 +1,6 @@
 from mongoengine import connect
-from config import db_host, db_name, db_user, db_pass
+from config import DB_HOST, DB_NAME, DB_USER, DB_PASS
 
 
 def init_db():
-    connect(db_name, host=db_host, username=db_user, password=db_pass)
+    connect(DB_NAME, host=DB_HOST, username=DB_USER, password=DB_PASS)
