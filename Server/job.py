@@ -2,8 +2,7 @@ from flask import Blueprint, jsonify, request, make_response, current_app
 from flask.ext.restful import Api, Resource, reqparse
 from lib.filter import DuplicatedFlowFilter
 from Server.script import script_set
-from Server.config import  DB_HOST, DB_NAME, DB_USER, DB_PASS
-from pymongo import MongoClient
+from Server.db import client
 import json
 
 
@@ -31,7 +30,6 @@ flow_filter = DuplicatedFlowFilter()
 parser = init_parse()
 job_bp = Blueprint('job', __name__)
 job_api = Api(job_bp)
-client = MongoClient("mongodb://{}:{}@{}/{}".format(DB_USER, DB_PASS, DB_HOST, DB_NAME))
 job_db = client.centaur
 
 
