@@ -10,12 +10,12 @@ class TestAuth(TestCase):
 
     def setUp(self):
         init_db()
-        self.fail_test = {
+        self.success_test = {
             'username': 'test',
             'password': '123',
             'email': 'test@test.com'
         }
-        self.success_test = {
+        self.fail_test = {
             'username': 'test',
             'password': 'test',
             'email': 'test@test.com'
