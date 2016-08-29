@@ -1,9 +1,25 @@
 from flask import Blueprint, jsonify, make_response
-from flask.ext.restful import Api, Resource
+from flask.ext.restful import Api, Resource, reqparse
 from Server.db import client
+from Server.config import ITEM_EACH_PAGE
+from bson.objectid import ObjectId
 import json
 
+MARK_LIST = ('success', 'fail')
+item_each_page = ITEM_EACH_PAGE
+
+
+def init_parse():
+    parser = reqparse.RequestParser()
+    parser.add_argument('mark', type=str)
+    parser.add_argument('item_each_page', type=int)
+    parser.add_argument('key', type=str)
+    parser.add_argument('regex', type= str)
+    parser.add_argument('code', type=int)
+    return parser
+
 result_bp = Blueprint('result', __name__)
+parser = init_parse()
 result_api = Api(result_bp)
 result_db = client.centaur
 
@@ -29,7 +45,86 @@ class UpdateResult(Resource):
                 return make_response(jsonify({"msg":e}))
         return make_response(jsonify({"msg":"success"}))
 
+    def get(self):
+        args = parser.parse_args()
+        if args['item_each_page']:
+            global item_each_page
+            item_each_page = args['item_each_page']
+            return make_response(jsonify({"item_each_page": item_each_page}))
+        else:
+            return make_response(jsonify({"item_each_page": item_each_page}))
 
-result_api.add_resource(UpdateResult, '/result')
+
+class Result(Resource):
+
+    def get(self, id):
+        result = result_db.results.find_one({'_id': ObjectId(id)})
+        result['_id'] = str(result['_id'])
+        return result
+
+    def delete(self, id):
+        response = result_db.results.delete_one({'_id': ObjectId(id)})
+        return response.deleted_count
+
+    def post(self, id):
+        args = parser.parse_args()
+        if args['mark']:
+            if args['mark'] in MARK_LIST:
+                result = result_db.results.update_one(
+                    {"_id": ObjectId(id)},
+                    {"$set":{
+                        "mark": args['mark']
+                    }}
+                )
+                return make_response(jsonify({"modified_count": result.modified_count}))
+
+            else:
+                response = make_response(jsonify({
+                    "msg": "Invalid mark."
+                }))
+                response.status_code = 400
+                return response
+        else:
+            response = make_response(jsonify({
+                "msg": "Invalid action."
+            }))
+            response.status_code = 400
+            return response
+
+
+class ListResult(Resource):
+
+    def get(self, page):
+        result = []
+        args = parser.parse_args()
+        key = args['key']
+        regex = args['regex']
+        code = args['code']
+
+        if key and regex:
+            if key in ("url", "poc", "msg", "endtime", "return"):
+                cursor = result_db.results.find({key: {'$regex': regex}}).sort([('endtime', -1)])\
+                    .skip((page-1)*item_each_page).limit(item_each_page)
+            else:
+                response = make_response(jsonify({"msg": "Invalid request."}))
+                response.status_code = 400
+                return response
+        elif code:
+            cursor = result_db.results.find({'code': code}).sort([('endtime', -1)])\
+                .skip((page-1)*item_each_page).limit(item_each_page)
+        else:
+            cursor = result_db.results.find().sort([('endtime', -1)])\
+                .skip((page-1)*item_each_page).limit(item_each_page)
+
+        for i in cursor:
+            i['_id'] = str(i['_id'])
+            result.append(i)
+
+        return result
+
+
+result_api.add_resource(UpdateResult, '/update/result')
+result_api.add_resource(Result, '/result/<string:id>')
+result_api.add_resource(ListResult, '/list/result/<int:page>')
 
 
