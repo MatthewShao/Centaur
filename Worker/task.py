@@ -70,7 +70,7 @@ def run(self, flow):
     try:
         poc = kb.registeredPocs[self.moduleName]
         url = flow.pop(URL)
-        result = poc.execute(url, mode='verify', params=flow)
+        result = poc.execute(url, mode='verify', params=str(flow))
         output = (url, self.pocName, (1, "success") if result.is_success() else (0, str(result.error[1])), time.strftime("%Y-%m-%d %X", time.localtime()), str(result.result))
         print output
         return output
