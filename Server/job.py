@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, make_response, current_app
+from flask import Blueprint, jsonify, make_response
 from flask.ext.restful import Api, Resource, reqparse
 from lib.filter import DuplicatedFlowFilter
 from Server.script import script_set
