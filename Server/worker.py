@@ -43,22 +43,18 @@ class InspectWorker(Resource):
                 else:
                     response = make_response(jsonify({
                         "msg": "Invalid task type."
-                    }))
-                    response.status_code = 400
+                    }), 400)
             else:
                 response = jsonify(inspect.stats())
         else:
             response = make_response(jsonify({
                 "msg": "Invalid worker name."
-            }))
-            response.status_code = 400
+            }), 400)
         return response
 
 class ManageWorker(Resource):
 
     def post(self):
-        # TODO provide remote control operations, including
-        # cancel consumers, pool restart, shutdown, purge
         args = parser.parse_args()
         dest = args['dest']
         # check if dest worker registered
@@ -70,8 +66,7 @@ class ManageWorker(Resource):
         if not registered:
             response = make_response(jsonify({
                 "msg": "Invalid woker name appears."
-            }))
-            response.status_code = 400
+            }), 400)
             return response
 
         if args['action'] == 'cancel_consumer':
@@ -86,8 +81,7 @@ class ManageWorker(Resource):
         else:
             response = make_response(jsonify({
                 "msg": "Invalid action."
-            }))
-            response.status_code = 400
+            }), 400)
             return response
 
 worker_api.add_resource(WorkerList, "/list/workers")

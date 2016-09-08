@@ -42,7 +42,7 @@ class UpdateResult(Resource):
                 result_db.results.insert_one(result_dict)
                 result_db.celery_taskmeta.delete_one({"_id":item["_id"]})
             except Exception,e:
-                return make_response(jsonify({"msg":e}))
+                return make_response(jsonify({"msg":e}), 500)
         return make_response(jsonify({"msg":"success"}))
 
     def get(self):
@@ -81,14 +81,12 @@ class Result(Resource):
             else:
                 response = make_response(jsonify({
                     "msg": "Invalid mark."
-                }))
-                response.status_code = 400
+                }), 400)
                 return response
         else:
             response = make_response(jsonify({
                 "msg": "Invalid action."
-            }))
-            response.status_code = 400
+            }), 400)
             return response
 
 
@@ -106,8 +104,7 @@ class ListResult(Resource):
                 cursor = result_db.results.find({key: {'$regex': regex}}).sort([('endtime', -1)])\
                     .skip((page-1)*item_each_page).limit(item_each_page)
             else:
-                response = make_response(jsonify({"msg": "Invalid request."}))
-                response.status_code = 400
+                response = make_response(jsonify({"msg": "Invalid request."}), 400)
                 return response
         elif code:
             cursor = result_db.results.find({'code': code}).sort([('endtime', -1)])\

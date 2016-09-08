@@ -70,8 +70,7 @@ class Script(Resource):
             except IOError:
                 response = make_response(jsonify({
                      "msg": "Fail to read script file."
-                }))
-                response.status_code = 500
+                }), 500)
                 return response
         else:
             return None
@@ -88,12 +87,11 @@ class Script(Resource):
                     script.set_invoke_rule(args['invoke_rule'], args['type'])
                     return make_response("Success")
                 except:
-                    return make_response("Failed")
+                    return make_response("Failed", 500)
             else:
                 response = make_response(jsonify({
                     "msg": "Invalid action."
-                }))
-                response.status_code = 400
+                }), 400)
                 return response
 
         else:
@@ -109,7 +107,7 @@ class Script(Resource):
 
         except Exception:
             script_set.update()
-            return make_response(jsonify({"msg": "Upload failed."}))
+            return make_response(jsonify({"msg": "Upload failed."}), 500)
 
 
 class ListScript(Resource):

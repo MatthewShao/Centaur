@@ -75,8 +75,7 @@ class Job(Resource):
         if args['action'] not in ('forget', 'revoke'):
             response = make_response(jsonify({
                 "msg": "Invalid action."
-            }))
-            response.status_code = 400
+            }), 400)
             return response
 
         if job:
@@ -85,26 +84,24 @@ class Job(Resource):
                     job.forget()
                     return make_response("Success")
                 except:
-                    return make_response("Failed")
+                    return make_response("Failed", 500)
 
             elif args['action'] == 'revoke':
                 try:
                     job.revoke()
                     return make_response("Success")
                 except:
-                    return make_response("Failed")
+                    return make_response("Failed", 500)
 
             else:
                 response = make_response(jsonify({
                     "msg": "Invalid action."
-                }))
-                response.status_code = 400
+                }), 400)
                 return response
         else:
             response = make_response(jsonify({
                 "msg": "Invalid job id or it is not in the pool."
-            }))
-            response.status_code = 400
+            }), 400)
             return response
 
 

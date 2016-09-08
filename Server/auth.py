@@ -23,10 +23,7 @@ class Auth(Resource):
             token = create_token(user)
             return {'token': token}
         else:
-            response = make_response(
-                jsonify({"msg": "Invalid username/password."})
-            )
-            response.status_code = 401
+            response = make_response(jsonify({"msg": "Invalid username/password."}), 401)
             return response
 
 
@@ -40,16 +37,17 @@ class Register(Resource):
             encrypted_pw = generate_password_hash(password)
             user = User(username=data['username'], password=encrypted_pw, email=data['email'])
             user.save()
+            response = make_response(jsonify({"objectid": str(user.id)}))
         except SaveConditionError:
-            return make_response(jsonify({"msg":"Register failed."}))
+            response = make_response(jsonify({"msg":"Register failed."}), 400)
         except ValidationError:
-            return make_response(jsonify({"msg":"Email address invalid."}))
+            response = make_response(jsonify({"msg":"Email address invalid."}), 400)
         except KeyError:
-            return make_response(jsonify({"msg":"Missing field."}))
+            response = make_response(jsonify({"msg":"Missing field."}), 400)
         except NotUniqueError:
-            return make_response(jsonify({"msg":"User existed."}))
-
-        return make_response(jsonify({"objectid":str(user.id)}))
+            response = make_response(jsonify({"msg":"User existed."}), 400)
+        finally:
+            return response
 
 
 def create_token(user):
