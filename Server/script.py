@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request, make_response, current_app, send_
 from flask.ext.restful import Api, Resource, reqparse
 from lib.model import ScriptBase
 from werkzeug import FileStorage
+from Server.auth import login_required
 import os
 
 
@@ -52,6 +53,7 @@ class ScriptSet(object):
 
 
 class Script(Resource):
+    method_decorators = [login_required]
 
     def get(self, name):
         script = script_set.get_script(name)
@@ -111,6 +113,8 @@ class Script(Resource):
 
 
 class ListScript(Resource):
+    method_decorators = [login_required]
+
     def get(self):
         script_set.update()
         result = []
@@ -120,6 +124,8 @@ class ListScript(Resource):
 
 
 class DownloadScript(Resource):
+    method_decorators = [login_required]
+
     def get(self, name):
         return send_from_directory('scripts', name + '.py')
 

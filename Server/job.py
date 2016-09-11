@@ -3,6 +3,7 @@ from flask.ext.restful import Api, Resource, reqparse
 from lib.filter import DuplicatedFlowFilter
 from Server.script import script_set
 from Server.db import client
+from Server.auth import login_required
 import json
 
 
@@ -54,7 +55,7 @@ class JobPool(object):
 
 
 class Job(Resource):
-    # refer: https://github.com/celery/celery/blob/master/celery/backends/mongodb.py#L164
+    method_decorators = [login_required]
 
     def get(self, id):
         job = job_db.celery_taskmeta.find_one({'_id': id})
@@ -118,6 +119,8 @@ class AddJob(Resource):
 
 
 class ListJob(Resource):
+
+    method_decorators = [login_required]
 
     def get(self):
         result = []

@@ -1,6 +1,7 @@
 from flask import Blueprint, make_response, jsonify
 from flask.ext.restful import Api, Resource, reqparse
 from Server.lib.celery_ import celery
+from Server.auth import login_required
 
 def init_parse():
     parser = reqparse.RequestParser()
@@ -15,6 +16,7 @@ parser = init_parse()
 
 
 class WorkerList(Resource):
+    method_decorators = [login_required]
 
     def get(self):
         inspect = celery.control.inspect()
@@ -22,6 +24,7 @@ class WorkerList(Resource):
 
 
 class InspectWorker(Resource):
+    method_decorators = [login_required]
 
     def get(self, name):
         args = parser.parse_args()
@@ -53,6 +56,7 @@ class InspectWorker(Resource):
         return response
 
 class ManageWorker(Resource):
+    method_decorators = [login_required]
 
     def post(self):
         args = parser.parse_args()
@@ -84,6 +88,6 @@ class ManageWorker(Resource):
             }), 400)
             return response
 
-worker_api.add_resource(WorkerList, "/list/workers")
+worker_api.add_resource(WorkerList, "/list/worker")
 worker_api.add_resource(InspectWorker, "/worker/<string:name>")
 worker_api.add_resource(ManageWorker, "/worker")

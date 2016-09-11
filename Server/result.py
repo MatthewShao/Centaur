@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, make_response
 from flask.ext.restful import Api, Resource, reqparse
 from Server.db import client
 from Server.config import ITEM_EACH_PAGE
+from Server.auth import login_required
 from bson.objectid import ObjectId
 import json
 
@@ -25,6 +26,7 @@ result_db = client.centaur
 
 
 class UpdateResult(Resource):
+    method_decorators = [login_required]
 
     def post(self):
         celery_stored = result_db.celery_taskmeta.find()
@@ -56,6 +58,7 @@ class UpdateResult(Resource):
 
 
 class Result(Resource):
+    method_decorators = [login_required]
 
     def get(self, id):
         result = result_db.results.find_one({'_id': ObjectId(id)})
@@ -64,7 +67,7 @@ class Result(Resource):
 
     def delete(self, id):
         response = result_db.results.delete_one({'_id': ObjectId(id)})
-        return response.deleted_count
+        return jsonify({"delete_count":response.deleted_count})
 
     def post(self, id):
         args = parser.parse_args()
@@ -91,6 +94,7 @@ class Result(Resource):
 
 
 class ListResult(Resource):
+    method_decorators = [login_required]
 
     def get(self, page):
         result = []
