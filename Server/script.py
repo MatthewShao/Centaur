@@ -4,6 +4,7 @@ from lib.model import ScriptBase
 from werkzeug import FileStorage
 from Server.auth import login_required
 import os
+from flask.json import dumps
 
 
 def init_parse():
@@ -119,12 +120,17 @@ class ListScript(Resource):
         script_set.update()
         result = []
         for s in script_set:
-            result.append((s.name, s.rule.is_enable))
-        return result
+            script = {
+                "name": s.name,
+                "invoke_rule": s.rule.string,
+                "is_enable": s.rule.is_enable,
+                "rule_type": s.rule.type
+            }
+            result.append(script)
+        return jsonify(scripts=result)
 
 
 class DownloadScript(Resource):
-    method_decorators = [login_required]
 
     def get(self, name):
         return send_from_directory('scripts', name + '.py')
