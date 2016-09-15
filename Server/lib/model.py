@@ -20,53 +20,73 @@ class User(Document):
     email = EmailField()
 
 
-class Rule(Document):
+class ScriptBase(Document):
     name = StringField(unique=True)
-    string = StringField()
-    type = StringField()
+    desc = StringField()
+    rules = ListField()
     is_enable = BooleanField()
 
-
-class ScriptBase(object):
-
-    def __init__(self, name, params=None, headers=None):
-        """
-
-        :param name: script name
-        :param params: Dict()
-        :param headers: Dict()
-        """
-        self.rule = Rule.objects(name=name).first()
-        if not self.rule:
-            self.rule = Rule(name=name, string=None, is_enable=True, type=None)
-            self.rule.save()
-        self.name = name
-        self.params = params
-        self.headers = headers
-        self._rule_regax = None
-
     def toggle_enable(self):
-        self.rule.is_enable = not self.rule.is_enable
-        self.rule.save()
-        return self.rule.is_enable
+        self.is_enable = not self.is_enable
+        self.save()
+        return self.is_enable
 
-    def set_invoke_rule(self, re_exp, type):
-        self.rule.string = re_exp
-        if type not in (METHOD, URL, FORM, REFERER, COOKIE, OTHER):
-            return False
-        self.rule.type = type
-        if re_exp:
-            self._rule_regax = re.compile(self.rule.string, re.I)
+    def set_invoke_rule(self, rule):
+        """
+        :param rules: a list in form of
+         ['operator', rule1, rule2]
+         where basic rule in form of, operator is considered as binary operator
+         ['-', 'type', 'regex']
+         e.g.: ['&', ['-', 'U', 'abc'], ['-', 'M', 'POST']]
+         means to accept the flow which url contains url and the method is POST
+        """
+        if self.validate_rules(rule):
+            self.rules = rule
+            self.save()
         else:
-            self._rule_regax = None
-        self.rule.save()
+            raise Exception, "Invalid rules"
+
+
+    def compile_rules(self, rule):
+        """
+        Use re.complie to complie the rules in list,
+        should be called like "self.pattern = self.compile_rules(self.rules)"
+        and later we can use self.pattern() to filter the flow
+        :param rule:  a list
+        :return: a function that accept a flow and return filtered or not
+        """
+        operator = rule[0]
+        if operator in ('&', '|'):
+            p1 = self.compile_rules(rule[1])
+            p2 = self.compile_rules(rule[2])
+            if operator == '&':
+                return  lambda s: p1(s) and p2(s)
+            elif operator == '|':
+                return lambda s: p1(s) or p2(s)
+        elif operator == '-':
+            rule_type = rule[1]
+            regex = rule[2]
+            pattern = re.compile(r'{}'.format(regex))
+            return lambda flow:bool(pattern.search(flow[rule_type]))
+
+    def validate_rules(self, rule):
+        if len(rule) == 3:
+            operator = rule[0]
+            if operator in ('&', '|'):
+                return self.validate_rules(rule[1]) and self.validate_rules(rule[2])
+            elif operator == '-':
+                if rule[1] in (METHOD, URL, FORM, REFERER, COOKIE, OTHER) and rule[2]:
+                    return True
+                else:
+                    return False
+            else:
+                return False
 
     def invoke_check(self, flow):
-        if not self.rule.string or not self.rule.type \
-              or self._rule_regax.search(flow[self.rule.type]):
+        if not hasattr(self, 'pattern'):
             return True
         else:
-            return False
+            return self.pattern(flow)
 
     def send_task(self, flow):
         job = celery.send_task('task.' + self.name, [flow,])
