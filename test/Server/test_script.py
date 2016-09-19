@@ -14,20 +14,12 @@ class TestScript(TestCase):
         self.api = api
         self.api.config['TESTING'] = True
 
-    def test_get(self):
-        with self.api.test_client() as c:
-            r = c.get('/api/list/script') # update script_set
-            r = c.get('/api/script/test')
-            j = json.loads(r.data)
-            assert j['name'] == 'test'
-
     def test_post(self):
         with self.api.test_client() as c:
-            c.get('/api/list/script') # update script_set
+            r = c.get('/api/list/script') # update script_set
 
-            r = c.get('/api/script/test')
             j = json.loads(r.data)
-            origin_state = j['is_enable']
+            origin_state = j['test']['is_enable']
 
             # test toggle
             c.post('/api/script/test', data={
@@ -35,18 +27,18 @@ class TestScript(TestCase):
             })
             r = c.get('/api/script/test')
             j = json.loads(r.data)
-            assert origin_state != j['is_enable']
+            assert origin_state != j['test'['is_enable']
 
             # test set_rule
+            rule  = ['&', ['-', 'U', 'abc'], ['-', 'F', 'efg']]
             r = c.post('/api/script/test', data={
                 'action': 'set_rule',
-                'invoke_rule': 'test abc',
-                'type': 'U'
+                'invoke_rule': rule
             })
             assert r.data == 'Success'
-            r = c.get('/api/script/test')
+            r = c.get('/api/list/script')
             j = json.loads(r.data)
-            assert j['invoke_rule'] == 'test abc'
+            assert j['test']['invoke_rule'] == rule
 
     def test_put(self):
         with self.api.test_client() as c:
@@ -55,7 +47,6 @@ class TestScript(TestCase):
             })
             assert "uploaded" in r.data
             os.remove('scripts/test_put.py')
-
 
 class TestScriptSet(TestCase):
 
@@ -80,12 +71,6 @@ class TestScriptSet(TestCase):
     def test_iter(self):
         for s in self.s:
             continue
-
-    def test_get_script(self):
-        script = self.s.get_script('test')
-        assert script.name == 'test'
-        script = self.s.get_script('junk')
-        assert not script
 
     def tearDown(self):
         os.remove('scripts/test.py')
