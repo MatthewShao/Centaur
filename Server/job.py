@@ -112,7 +112,7 @@ class AddJob(Resource):
         flow = parser.parse_args()
         if flow not in flow_filter:
             for script in script_set:
-                if script.invoke_check(flow):
+                if script.is_enable and script.invoke_check(flow):
                     job = script.send_task(flow=flow)
                     pool.add(job)
             flow_filter.add(flow)

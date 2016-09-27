@@ -20,6 +20,7 @@ from filter import FlowFilter
 from handler import FlowHandler
 from docopt import docopt
 
+PORT = 8081
 
 class Master(controller.Master):
     def __init__(self, server, flow_filter, flow_handler):
@@ -28,7 +29,7 @@ class Master(controller.Master):
         self.handler = flow_handler
 
     def run(self):
-        print "[*] Running proxy on port 8080..."
+        print "[*] Running proxy on port {}...".format(PORT)
         try:
             return controller.Master.run(self)
         except KeyboardInterrupt:
@@ -55,7 +56,7 @@ def start():
         print "--filter should set to (NONE|LOW|HIGH)"
         print __doc__
         exit()
-    config = proxy.ProxyConfig(port=8080)
+    config = proxy.ProxyConfig(port=PORT)
     server = ProxyServer(config)
 
     flow_filter = FlowFilter(arguments['--filter'], arguments['-p'], arguments['-d'], arguments['--blacklist'])

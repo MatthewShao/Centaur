@@ -74,7 +74,7 @@ def login_required(func):
             return response
         try:
             obj = parse_token(request)
-        except jwt.DecodeError:
+        except (jwt.DecodeError, jwt.ExpiredSignatureError):
             response = jsonify(message='Token is invalid.')
             response.status_code = 401
             return response

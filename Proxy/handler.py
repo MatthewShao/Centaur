@@ -31,7 +31,7 @@ class FlowHandler(object):
             self.api_url = API_URL
         # Test the connection to api first.
         try:
-            r = requests.get("http://127.0.0.1:5000/api/list/job")
+            r = requests.get("http://127.0.0.1:5000/api/list/script")
         except ConnectionError:
             print "Fail to connect to the api! Exit..."
             exit()

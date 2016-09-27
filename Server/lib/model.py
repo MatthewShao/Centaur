@@ -66,7 +66,7 @@ class ScriptBase(Document):
         elif operator == '-':
             rule_type = rule[1]
             regex = rule[2]
-            pattern = re.compile(r'{}'.format(regex))
+            pattern = re.compile('{}'.format(regex))
             return lambda flow:bool(pattern.search(flow[rule_type]))
 
     def validate_rules(self, rule):
@@ -76,6 +76,7 @@ class ScriptBase(Document):
                 return self.validate_rules(rule[1]) and self.validate_rules(rule[2])
             elif operator == '-':
                 if rule[1] in (METHOD, URL, FORM, REFERER, COOKIE, OTHER) and rule[2]:
+                    print rule[2]
                     return True
                 else:
                     return False

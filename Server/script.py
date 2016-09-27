@@ -6,6 +6,7 @@ from Server.auth import login_required
 from mongoengine import DoesNotExist
 import os
 import re
+import json
 
 
 def init_parse():
@@ -70,20 +71,35 @@ class ScriptSet(object):
 
 
 class Script(Resource):
-    method_decorators = [login_required]
+    # method_decorators = [login_required]
+
+    def get(self, name):
+        script = script_set.get_script(name)
+        if script:
+            result = {
+                "name": script.name,
+                "invoke_rule": script.rules,
+                "is_enable": script.is_enable,
+                "desc": script.desc
+            }
+            return jsonify(result)
+        else:
+            return None
 
     def post(self, name):
         args = parser.parse_args()
         script = script_set.get_script(name)
         if script:
             if args['action'] == 'toggle':
+                script_set.update()
                 return script.toggle_enable()
 
             elif args['action'] == 'set_rule':
                 try:
                     script.set_invoke_rule(args['invoke_rule'])
                     return make_response("Success")
-                except:
+                except Exception, e:
+                    print e
                     return make_response("Failed", 500)
             else:
                 response = make_response(jsonify({
@@ -108,7 +124,7 @@ class Script(Resource):
 
 
 class ListScript(Resource):
-    method_decorators = [login_required]
+    # method_decorators = [login_required]
 
     def get(self):
         script_set.update()

@@ -27,10 +27,11 @@ def load_scripts():
     scripts_set = {}
     try:
         r = requests.get(SERVER + '/api/list/script')
-        scripts = json.loads(r.content)
+        scripts = json.loads(r.content)['scripts']
         for s in scripts:
-            if s[1]:
-                scripts_set[str(s[0])] = None
+            if s["is_enable"]:
+                name = str(s["name"])
+                scripts_set[name] = None
         for s in scripts_set.iterkeys():
             r = requests.get(SERVER + '/api/download/script/' + s)
             scripts_set[s] = r.content
@@ -71,9 +72,12 @@ def run(self, flow):
         poc = kb.registeredPocs[self.moduleName]
         url = flow.pop(URL)
         result = poc.execute(url, mode='verify', params=str(flow))
-        output = (url, self.pocName, (1, "success") if result.is_success() else (0, str(result.error[1])), time.strftime("%Y-%m-%d %X", time.localtime()), str(result.result))
-        print output
-        return output
+        if result:
+            output = (url, self.pocName, (1, "success") if result.is_success() else (0, str(result.error[1])), time.strftime("%Y-%m-%d %X", time.localtime()), str(result.result))
+            print output
+            return output
+        else:
+            raise Exception("No result return.")
     except Exception, ex:
         logger.error(ex)
         return None

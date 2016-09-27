@@ -6,13 +6,12 @@ from Server.auth import login_required
 from bson.objectid import ObjectId
 import json
 
-MARK_LIST = ('success', 'fail')
 item_each_page = ITEM_EACH_PAGE
 
 
 def init_parse():
     parser = reqparse.RequestParser()
-    parser.add_argument('mark', type=str)
+    parser.add_argument('mark', type=bool)
     parser.add_argument('item_each_page', type=int)
     parser.add_argument('key', type=str)
     parser.add_argument('regex', type= str)
@@ -32,19 +31,20 @@ class UpdateResult(Resource):
         celery_stored = result_db.celery_taskmeta.find()
         for item in celery_stored:
             result = json.loads(item["result"])
-            result_dict = {
-                "url": result[0],
-                "poc": result[1],
-                "code": result[2][0],
-                "msg": result[2][1],
-                "endtime": result[3],
-                "return": result[4]
-            }
-            try:
-                result_db.results.insert_one(result_dict)
-                result_db.celery_taskmeta.delete_one({"_id":item["_id"]})
-            except Exception,e:
-                return make_response(jsonify({"msg":e}), 500)
+            if result:
+                result_dict = {
+                    "url": result[0],
+                    "poc": result[1],
+                    "code": result[2][0],
+                    "msg": result[2][1],
+                    "endtime": result[3],
+                    "return": result[4]
+                }
+                try:
+                    result_db.results.insert_one(result_dict)
+                    result_db.celery_taskmeta.delete_one({"_id":item["_id"]})
+                except Exception,e:
+                    return make_response(jsonify({"msg":e}), 500)
         return make_response(jsonify({"msg":"success"}))
 
     def get(self):
@@ -71,21 +71,18 @@ class Result(Resource):
 
     def post(self, id):
         args = parser.parse_args()
-        if args['mark']:
-            if args['mark'] in MARK_LIST:
+        if 'mark' in args:
+            if args['mark'] in (True, False):
                 result = result_db.results.update_one(
                     {"_id": ObjectId(id)},
                     {"$set":{
                         "mark": args['mark']
                     }}
                 )
-                return make_response(jsonify({"modified_count": result.modified_count}))
-
             else:
-                response = make_response(jsonify({
-                    "msg": "Invalid mark."
-                }), 400)
-                return response
+                return make_response(jsonify({"msg": "Invalid Mark."}))
+            return make_response(jsonify({"modified_count": result.modified_count}))
+
         else:
             response = make_response(jsonify({
                 "msg": "Invalid action."
